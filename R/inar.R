@@ -1,10 +1,18 @@
 # inar.R
 
-#' Model training
-#'
-#' Computes the posterior distribution
-#'
-#' @return A model
+#' INAR model training
+#' @description Computes the posterior distribution for the INAR family using a Gibbs sampler.
+#' @param time_series A univariate time series.
+#' @param prior List of prior hyperparameters where:
+	#' \describe{
+	#'  \item{a_alpha}{Hyperparameters of the thinning component.}
+	#'  \item{a_lambda, b_lambda}{Hyperparameters of the Gamma prior for the Poisson innovation rate.}
+	#' }
+#' @param burn_in Number of iterations for the "burn-in" period which are discarded in the chain.
+#' @param chain_length Number of iterations of the chain.
+#' @param random_seed Value of the random seed generator.
+#' @param verbose  If \code{TRUE} log info is provided.
+#' @return inar returns an object of class "inar".
 #' 
 #' @export
 inar <- function(time_series,
@@ -17,7 +25,9 @@ inar <- function(time_series,
                    random_seed = 1761,
                    verbose = TRUE)
 {
-    if (!length(time_series) > 0) stop("Time series must have positive length.")
+    if (any(time_series %% 1 != 0)) stop("Time series must have only counts.")
+	if (any(time_series < 0)) stop("Time series must have only positive counts.")
+	if (!length(time_series) > 0) stop("Time series must have positive length.")
     if (length(time_series) <= p) stop("Time series length must be bigger than p.")
     if (!burn_in >= 0) stop("Burn-in must be positive.")
     if (!chain_length >= 0) stop("Chain length must be positive.")
@@ -30,7 +40,7 @@ inar <- function(time_series,
         
     if (is.null(prior[["a_lambda"]]) || is.null(prior[["b_lambda"]])) {
         prior[["a_lambda"]] <- 1
-        prior[["b_lambda"]] <- 1
+        prior[["b_lambda"]] <- 0.1
     }
     
     if (is.null(prior[["a_alpha"]])) prior[["a_alpha"]] <- rep(1, p)
@@ -61,56 +71,24 @@ inar <- function(time_series,
     invisible(model)
 }
 
+#' Predict Method for INAR models
+#' @description Obtains predictions and predictive distribution from a trained INAR model object.
+#' @param model A trained object of class inheriting from "inar".
+#' @param h Number of steps ahead to be predicted. 
+#' @param replications Number of replications for each posterior sample.
+#' @return A list with the following elements: 
+#' \describe{
+#'  \item{est}{The \code{h}-steps-ahead prediction.}
+#'  \item{distr}{The \code{h}-steps-ahead predictive distribution.}
+#' }
 predict.inar <- function(model, h = 1, replications = 10^4) {
     pred <- .predictive_distribution_inar(model, h, replications)
     list(est = .generalized_median(pred), distr = pred)
 }
 
-cross_validate_inar <- function(time_series,
-                           p = 1,
-                           h = 1,
-                           training_epoch = NULL,
-                           prior = list(a_alpha = NULL,
-                                        a_lambda = NULL, b_lambda = NULL),
-                           burn_in = 10^3,
-                           chain_length = 10^4,
-                           random_seed = 1761,
-                           verbose = TRUE)
-{
-    if(is.null(training_epoch)) training_epoch <- round(0.7 * length(time_series))
-    
-    # y_hat <- numeric(length(time_series) - (training_epoch + h) + 1)
-    y_hat <- matrix(NA, nrow = length(h), ncol = length(time_series) - (training_epoch + min(h)) + 1)
-    diff_y_hat_obs <- matrix(NA, nrow = length(h), ncol = length(time_series) - (training_epoch + min(h)) + 1)
-    
-    for (j in 1:ncol(y_hat)) {
-        if (verbose) cat(sprintf("Training up to epoch %d ...\n", training_epoch + j - 1))
-        model <- inar(time_series[1:(training_epoch + j - 1)],
-                        p = p,
-                        prior = prior,
-                        burn_in = burn_in,
-                        chain_length = chain_length,
-                        random_seed = random_seed,
-                        verbose = verbose)
-        
-        for (i in 1:nrow(y_hat)) {
-            if (training_epoch + j + i - 1  <= length(time_series)) {
-                if (verbose) cat(sprintf("Predicting epoch %d (h = %d)...\n", training_epoch + j + i - 1, h[i]))
-                y_hat[i, j + i - 1] <- predict(model, h = h[i])$est
-                diff_y_hat_obs[i, j + i - 1] = abs(time_series[training_epoch + j + i - 1] - y_hat[i, j + i - 1])
-            }
-        }
-    }
-    
-    mae <- numeric(length(h))
-    mae <- rowMeans(diff_y_hat_obs, na.rm = TRUE)
-    names(mae) <- paste0("MAE (h = ", h, ")")
-    
-    list(est = y_hat, mae = mae)
-}
-#' Model summaries INAR(p)
+#' INAR model summaries
 #'
-#' Summarises the model
+#' Summarizes the fitted INAR model
 #'
 #' @return A summary
 #' 
@@ -136,7 +114,7 @@ summary.inar <- function(model) {
         printf("  alpha_%d = %.2f  [ %.2f ; %.2f ]\n", i, mean(model$chain$alpha[, i]), post_qs[1], post_qs[2])
     }
     post_qs <- unname(quantile(model$chain$lambda, probs = c(0.025, 0.975)))
-    printf("  lambda_%d = %.2f  [ %.2f ; %.2f ]\n", i, mean(model$chain$lambda), post_qs[1], post_qs[2])
+    printf("  lambda = %.2f  [ %.2f ; %.2f ]\n", i, mean(model$chain$lambda), post_qs[1], post_qs[2])
     
     printf("Total simulation time: %.2f seconds\n\n", round(model$elapsed[3]))
 }

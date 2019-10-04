@@ -2,7 +2,7 @@
 % Please edit documentation in R/adinar.R
 \name{summary.adinar}
 \alias{summary.adinar}
-\title{Model summaries INAR(p)}
+\title{AdINAR model summaries}
 \usage{
 \method{summary}{adinar}(model)
 }
@@ -10,5 +10,5 @@
 A summary
 }
 \description{
-Summarises the model
+Summarizes the fitted AdINAR model
 }

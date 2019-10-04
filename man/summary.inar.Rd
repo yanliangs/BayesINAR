@@ -2,7 +2,7 @@
 % Please edit documentation in R/inar.R
 \name{summary.inar}
 \alias{summary.inar}
-\title{Model summaries INAR(p)}
+\title{INAR model summaries}
 \usage{
 \method{summary}{inar}(model)
 }
@@ -10,5 +10,5 @@
 A summary
 }
 \description{
-Summarises the model
+Summarizes the fitted INAR model
 }

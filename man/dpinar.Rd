@@ -14,7 +14,7 @@ dpinar(time_series, p = 1, prior = list(a_alpha = NULL, a_tau = NULL,
 \item{prior}{List of prior hyperparameters where:
 \describe{
  \item{a_alpha}{Hyperparameters of the thinning component.}
- \item{a_tau, b_tau}{Hyperparameters of the concentration parameter Gamma prior.}
+ \item{a_tau, b_tau}{Hyperparameters of the concentration parameter with Gamma prior.}
  \item{a0, b0}{Base measure hyperparameters.}
  \item{lambda_max}{Hyperparameter of the uniform distribution that minimizes the corresponding D-KL.}
 }}

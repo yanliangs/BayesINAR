@@ -2,7 +2,7 @@
 % Please edit documentation in R/dpinar.R
 \name{summary.dpinar}
 \alias{summary.dpinar}
-\title{Model summaries}
+\title{DP-INAR model summaries}
 \usage{
 \method{summary}{dpinar}(model)
 }
@@ -10,5 +10,5 @@
 A summary
 }
 \description{
-Summarises the model
+Summarizes the fitted DP-INAR model
 }

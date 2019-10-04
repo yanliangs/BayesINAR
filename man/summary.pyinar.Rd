@@ -2,7 +2,7 @@
 % Please edit documentation in R/pyinar.R
 \name{summary.pyinar}
 \alias{summary.pyinar}
-\title{Model summaries}
+\title{PY-INAR model summaries}
 \usage{
 \method{summary}{pyinar}(model)
 }
@@ -10,5 +10,5 @@
 A summary
 }
 \description{
-Summarises the model
+Summarizes the fitted PY-INAR model
 }

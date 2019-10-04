@@ -6,7 +6,7 @@
 #' @param prior List of prior hyperparameters where:
 	#' \describe{
 	#'  \item{a_alpha}{Hyperparameters of the thinning component.}
-	#'  \item{a_tau, b_tau}{Hyperparameters of the concentration parameter Gamma prior.}
+	#'  \item{a_tau, b_tau}{Hyperparameters of the concentration parameter with Gamma prior.}
 	#'  \item{a0, b0}{Base measure hyperparameters.}
 	#'  \item{lambda_max}{Hyperparameter of the uniform distribution that minimizes the corresponding D-KL.}
 	#' }
@@ -28,7 +28,9 @@ dpinar <- function(time_series,
                    random_seed = 1761,
                    verbose = TRUE)
 {
-    if (!length(time_series) > 0) stop("Time series must have positive length.")
+    if (any(time_series %% 1 != 0)) stop("Time series must have only counts.")
+	if (any(time_series < 0)) stop("Time series must have only positive counts.")
+	if (!length(time_series) > 0) stop("Time series must have positive length.")
     if (length(time_series) <= p) stop("Time series length must be bigger than p.")
     if (!burn_in >= 0) stop("Burn-in must be positive.")
     if (!chain_length >= 0) stop("Chain length must be positive.")
@@ -102,77 +104,14 @@ predict.dpinar <- function(model, h = 1, replications = 10^4) {
     list(est = .generalized_median(pred), distr = pred)
 }
 
-#' Time series cross-validation with DP-INAR model predictions
-#' @description Obtain predictions of a given test set and the mean absolute errors
-#' @param time_series A univariate time series.
-#' @param h Number of steps ahead to be predicted. 
-#' @param training_epoch The last observation of the first training set.
-#' @param prior List of prior hyperparameters where:
-#' \describe{
-#'  \item{a_alpha}{Hyperparameters of the thinning component.}
-#'  \item{a_tau, b_tau}{Hyperparameters of the concentration parameter Gamma prior.}
-#'  \item{a0, b0}{Base measure hyperparameters.}
-#'  \item{lambda_max}{Hyperparameter of the uniform distribution that minimizes the corresponding D-KL.}
-#' }
-#' @param burn_in Number of iterations for the "burn-in" period which are discarded in the chain.
-#' @param chain_length Number of iterations of the chain.
-#' @param random_seed Value of the random seed generator.
-#' @param verbose  If \code{TRUE} log info is provided.
-#' @return A list with the following elements:
-#' \describe{
-#'  \item{est}{Predictions of the test set.}
-#'  \item{mae}{Mean Absolute Error of the test set predictions.}
-#' }
-cross_validate_dpinar <- function(time_series,
-                           p = 1,
-                           h = 1,
-                           training_epoch = NULL,
-                           prior = list(a_alpha = NULL,
-                                        a_tau = NULL, b_tau = NULL,
-                                        a0 = NULL, b0 = NULL,
-                                        lambda_max = NULL),
-                           burn_in = 10^3,
-                           chain_length = 10^4,
-                           random_seed = 1761,
-                           verbose = TRUE)
-{
-    if(is.null(training_epoch)) training_epoch <- round(0.7 * length(time_series))
-
-    y_hat <- matrix(NA, nrow = length(h), ncol = length(time_series) - (training_epoch + min(h)) + 1)
-    diff_y_hat_obs <- matrix(NA, nrow = length(h), ncol = length(time_series) - (training_epoch + min(h)) + 1)
-
-    for (j in 1:ncol(y_hat)) {
-        if (verbose) cat(sprintf("Training up to epoch %d ...\n", training_epoch + j - 1))
-        model <- dpinar(time_series[1:(training_epoch + j - 1)],
-                        p = p,
-                        prior = prior,
-                        burn_in = burn_in,
-                        chain_length = chain_length,
-                        random_seed = random_seed,
-                        verbose = verbose)
-        
-        for (i in 1:nrow(y_hat)) {
-            if (training_epoch + j + i - 1  <= length(time_series)) {
-        	    if (verbose) cat(sprintf("Predicting epoch %d (h = %d)...\n", training_epoch + j + i - 1, h[i]))
-                y_hat[i, j + i - 1] <- predict(model, h = h[i])$est
-                diff_y_hat_obs[i, j + i - 1] = abs(time_series[training_epoch + j + i - 1] - y_hat[i, j + i - 1])
-            }
-        }
-    }
-    
-    mae <- rowMeans(diff_y_hat_obs, na.rm = TRUE)
-    names(mae) <- paste0("MAE (h = ", h, ")")
-    
-    list(est = y_hat, mae = mae)
-}
-
-#' Model summaries
+#' DP-INAR model summaries
 #'
-#' Summarises the model
+#' Summarizes the fitted DP-INAR model
 #'
 #' @return A summary
 #' 
 #' @export
+
 summary.dpinar <- function(model) {
     printf <- function(...) cat(sprintf(...))
     printf("\n========================\n")

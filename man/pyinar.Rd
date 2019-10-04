@@ -2,16 +2,36 @@
 % Please edit documentation in R/pyinar.R
 \name{pyinar}
 \alias{pyinar}
-\title{Model training}
+\title{PY-INAR model training}
 \usage{
 pyinar(time_series, p = 1, prior = list(a_alpha = NULL, a0 = NULL, b0 =
   NULL, tau = NULL, k0 = NULL, sigma = NULL, lambda_max = NULL),
   burn_in = 10^3, chain_length = 10^4, random_seed = 1761,
   verbose = TRUE)
 }
+\arguments{
+\item{time_series}{A univariate time series.}
+
+\item{prior}{List of prior hyperparameters where:
+\describe{
+ \item{a_alpha}{Hyperparameters of the thinning component.}
+ \item{a0, b0}{Base measure hyperparameters.}
+ \item{lambda_max}{Hyperparameter of the uniform distribution that minimizes the corresponding D-KL.}
+}}
+
+\item{burn_in}{Concentration parameter of the Pitman-Yor process.}
+
+\item{chain_length}{Number of iterations of the chain.}
+
+\item{random_seed}{Value of the random seed generator.}
+
+\item{verbose}{If \code{TRUE} log info is provided.}
+
+\item{burn_in}{Number of iterations for the "burn-in" period which are discarded in the chain.}
+}
 \value{
-A model
+dpinar returns an object of class "pyinar".
 }
 \description{
-Computes the posterior distribution
+Computes the posterior distribution for the PY-INAR family using a Gibbs sampler.
 }

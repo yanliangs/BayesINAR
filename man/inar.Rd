@@ -2,15 +2,32 @@
 % Please edit documentation in R/inar.R
 \name{inar}
 \alias{inar}
-\title{Model training}
+\title{INAR model training}
 \usage{
 inar(time_series, p = 1, prior = list(a_alpha = NULL, a_lambda = NULL,
   b_lambda = NULL), burn_in = 10^3, chain_length = 10^4,
   random_seed = 1761, verbose = TRUE)
 }
+\arguments{
+\item{time_series}{A univariate time series.}
+
+\item{prior}{List of prior hyperparameters where:
+\describe{
+ \item{a_alpha}{Hyperparameters of the thinning component.}
+ \item{a_lambda, b_lambda}{Hyperparameters of the Gamma prior for the Poisson innovation rate.}
+}}
+
+\item{burn_in}{Number of iterations for the "burn-in" period which are discarded in the chain.}
+
+\item{chain_length}{Number of iterations of the chain.}
+
+\item{random_seed}{Value of the random seed generator.}
+
+\item{verbose}{If \code{TRUE} log info is provided.}
+}
 \value{
-A model
+inar returns an object of class "inar".
 }
 \description{
-Computes the posterior distribution
+Computes the posterior distribution for the INAR family using a Gibbs sampler.
 }
