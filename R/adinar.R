@@ -99,7 +99,7 @@ adinar <- function(time_series,
 #' @description Obtains predictions and predictive distribution from a trained AdINAR model object.
 #' @param model A trained object of class inheriting from "adinar".
 #' @param h Number of steps ahead to be predicted. 
-#' @param replications Number of replications for each posterior sample.
+#' @param replications Number of replications to each posterior sample.
 #' @return A list with the following elements: 
 #' \describe{
 #'  \item{est}{The \code{h}-steps-ahead prediction.}
