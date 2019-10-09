@@ -11,7 +11,7 @@
 
 \item{h}{Number of steps ahead to be predicted.}
 
-\item{replications}{Number of replications for each posterior sample.}
+\item{replications}{Number of replications to each posterior sample.}
 }
 \value{
 A list with the following elements: 
