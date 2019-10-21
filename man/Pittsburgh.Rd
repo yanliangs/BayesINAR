@@ -4,7 +4,7 @@
 \name{Pittsburgh}
 \alias{Pittsburgh}
 \title{Pittsburgh burglary data set.}
-\format{A data frame with 144 months and 36 patrol areas:}
+\format{A data frame with 144 months and 36 patrol areas.}
 \source{
 \url{http://www.forecastingprinciples.com/index.php/crimedata}
 }

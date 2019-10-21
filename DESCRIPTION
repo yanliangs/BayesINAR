@@ -3,10 +3,11 @@ Type: Package
 Title: BayesINAR model package
 Version: 1.0
 Date: 2019-10-04
-Author: Helton Graziadei, Hedibert F. Lopes and Paulo C. Marques F.
+Author: Helton Graziadei, Hedibert F. Lopes and Paulo C. Marques F
 Maintainer: Helton Graziadei <hgcusp@gmail.com>
-Description: Generalized Bayesian models for time series of counts, with functions for training and prediction. 
+Description: Generalized Bayesian models for time series of counts, 
+             with functions for training and prediction.
 License: GPL (>= 2)
-Imports: Rcpp (>= 1.0.2)
-LinkingTo: Rcpp (>= 0.12.16), RcppArmadillo, RcppProgress
+Imports: Rcpp (>= 1.0.2), gsl
+LinkingTo: Rcpp, RcppArmadillo, RcppProgress, gsl
 RoxygenNote: 6.1.1
